@@ -1,0 +1,37 @@
+name: Cobot workflow
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  diff-changes:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Get the recent commit author
+      run: |
+        author_id=$(git log -1 --format="%an <%ae>" | grep -o '<[0-9]\+' | sed 's/<//')
+        echo "author_id=$author_id" >> $GITHUB_ENV
+
+    - name: save to diff.txt
+      run: |
+        git fetch origin ${{ github.event.before }} ${{ github.event.after }} # 이전 커밋과 현재 커밋 가져오기
+        git diff ${{ github.event.before }} ${{ github.event.after }} | grep '^+[^+]' | sed 's/^+//' > diff.txt # 변경 사항 중 추가된 내용만을 가져와 txt 생성
+        cat diff.txt
+
+    - name: Create payload.json
+      run: |
+        diff=$(cat diff.txt | jq -Rs .) # diff.txt를 josn 형식의 값으로 변환
+        echo "{\"author_id\": \"${{ env.author_id }}\", \"diff\": $diff}" > payload.json # author와 diff를 json 확장자로 변환
+        cat payload.json
+        
+    - name: Send POST request with payload.json
+      run: |
+        curl -X POST "https://wmece3xj7buljd34mtjat6y3qi0nwhwi.lambda-url.ap-northeast-2.on.aws/" \
+        -H "Content-Type: application/json" \
+        -d @payload.json
