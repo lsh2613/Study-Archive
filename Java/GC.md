@@ -154,7 +154,7 @@ Sweep과 Summary의 가장 큰 차이는 Sweep은 명시적으로 메모리를 �
 2. Color Point와 Load Barrierfmf 활용해 객체의 상태를 추적하여 객체 이동 시간 감소
 3. ZPage를 통한 효율적인 메모리 관리
 
-## 6. Minor GC vs Magor GC
+## 6. Minor GC vs Major GC
 | **GC 종류**  | **Minor GC**            | **Major GC**          |
 |--------------|--------------------------|-----------------------|
 | **대상**      | Young Generation        | Old Generation        |
